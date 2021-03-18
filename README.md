@@ -36,4 +36,4 @@ docker-compose up
 
 ## Libro Mastro - Postgress
 
-Tengo un grande libro con tutte le mie trattative, ci tengo molto, me l'aveva regalato mia madre, la *Contessa di Castiglione*, per festeggiare la mia prima spedizione dove ho risalito il Nilo. Ti svelerò un segreto, non ci sono solo conti qui dentro.
+Tengo un grande libro con tutte le mie trattative, ci tengo molto, me l'aveva regalato mia madre, la *Contessa di Castiglione*, per festeggiare la mia prima spedizione risalendo il Nilo. Ti svelerò un segreto, non ci sono solo conti qui dentro, diciamo che nei miei lunghi viaggio ho sviluppano un certo gusto per le *micette Tonkinesi*...
