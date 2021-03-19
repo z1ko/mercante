@@ -94,7 +94,7 @@ async fn run() {
     });
     
     // Inizializza database con le strutture richieste
-    initialize_database(&&db_client, "./translations/initialize.sql")
+    initialize_database(&&db_client, "/etc/mercante/initialize.sql")
         .await;
 
     // Aggiunge variabili globali

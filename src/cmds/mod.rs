@@ -22,7 +22,7 @@ use serenity::{
 pub mod disco;
 
 #[group]
-#[commands(info, storia, vetrina)]
+#[commands(info, storia, vetrina, specchio)]
 struct General;
 
 // TODO: Carica da file configurazione
@@ -53,9 +53,8 @@ Ricorda che l'erba gatta è una valuta accettata e molto gradita,
 direi in molti casi perfino necessaria se vuoi guadagnarti la mia approvazione.
 ";
 
-// Fai presentare il mercante
-
 #[command]
+#[description("Fai presentare il mercante")]
 async fn info(ctx: &Context, msg: &Message, _args: Args) -> CommandResult {
     msg.channel_id.say(&ctx.http, PRESENTATION)
         .await?;
@@ -63,9 +62,8 @@ async fn info(ctx: &Context, msg: &Message, _args: Args) -> CommandResult {
     Ok(())
 }
 
-// Fai raccontare una storia al mercante
-
 #[command]
+#[description("Fai raccontare una storia al mercante")]
 async fn storia(ctx: &Context, msg: &Message, _args: Args) -> CommandResult {
     msg.channel_id.say(&ctx.http, "No, in questo momento ho altro da fare, quel Sangue di Giuda non si troverà da solo")
         .await?;
@@ -73,9 +71,9 @@ async fn storia(ctx: &Context, msg: &Message, _args: Args) -> CommandResult {
     Ok(())
 }
 
-// Mostra gli oggetti acquistabili
-
 #[command]
+#[aliases("negozio", "offerte")]
+#[description("Mostra gli oggetti acquistabili")]
 async fn vetrina(ctx: &Context, msg: &Message, _args: Args) -> CommandResult {
 
     msg.channel_id.send_message(&ctx.http, |m| {
@@ -97,5 +95,11 @@ async fn vetrina(ctx: &Context, msg: &Message, _args: Args) -> CommandResult {
     })
     .await?;
 
+    Ok(())
+}
+
+#[command]
+#[description("Mostra caratteristiche personali")]
+async fn specchio(ctx: &Context, msg: &Message, _args: Args) -> CommandResult {
     Ok(())
 }

@@ -1,5 +1,5 @@
 
-use crate::common::Database;
+use crate::common::*;
 
 use serenity::{
     framework::standard::{
@@ -50,10 +50,6 @@ async fn aggiungi(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
 
     // TODO: Scala erba gatta
 
-    // Chiave primaria
-    let user_id: u64 = msg.author.id.into();
-    let user_id = user_id.to_string();
-
     // Ottiene lock al database
     let db_lock = 
     {
@@ -65,11 +61,18 @@ async fn aggiungi(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
 
     // Aggiunge disco nel database
     {
+        // Postgres non permette di memorizzare u64, quindi semplicemente
+        // copiamo i bit in un i64 e facciamo finta sia un u64...
+        let user_id: i64 = interpret_u64_as_i64(msg.author.id.into());
+
         let data_write = db_lock.write().await;
-        data_write.execute(
-            "INSERT INTO disco (utente, link, nome) VALUES ($1, $2, $3)",
-            &[&user_id, &nome, &link] 
-        ).await?;
+        if let Err(e) = data_write.execute(
+            "INSERT INTO disco (utente, nome, link) VALUES ($1, '$2', '$3')",
+            &[&user_id, &nome, &link]).await 
+        {
+            println!("[E] Errore inserimento nel database: {}", e);
+            return Ok(());
+        }
     }
 
     // Crea risposta ad hoc in privato
@@ -114,10 +117,6 @@ async fn rimuovi(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult 
 
     // TODO: Ottieni erba gatta
 
-    // Chiave primaria
-    let user_id: u64 = msg.author.id.into();
-    let user_id = user_id.to_string();
-
     // Ottiene lock al database
     let db_lock = 
     {
@@ -129,9 +128,13 @@ async fn rimuovi(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult 
 
     // Aggiunge disco nel database
     {
+        // Postgres non permette di memorizzare u64, quindi semplicemente
+        // copiamo i bit in un i64 e facciamo finta sia un u64...
+        let user_id: i64 = interpret_u64_as_i64(msg.author.id.into());
+
         let data_write = db_lock.write().await;
         data_write.execute(
-            "DELETE FROM disco WHERE utente = $1 AND nome = $2",
+            "DELETE FROM disco WHERE utente = $1 AND nome = '$2'",
             &[&user_id, &nome] 
         ).await?;
     }
@@ -158,10 +161,6 @@ async fn rimuovi(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult 
 async fn lista(ctx: &Context, msg: &Message, _args: Args) -> CommandResult {
     println!("[I] Richiesta di elencazione dischi utente");
 
-    // Chiave primaria
-    let user_id: u64 = msg.author.id.into();
-    let user_id = user_id.to_string();
-
     // Ottiene lock al database
     let db_lock = 
     {
@@ -174,6 +173,10 @@ async fn lista(ctx: &Context, msg: &Message, _args: Args) -> CommandResult {
     // Aggiunge disco nel database
     let mut fields: Vec<(String, String, bool)> = Vec::new();
     {
+        // Postgres non permette di memorizzare u64, quindi semplicemente
+        // copiamo i bit in un i64 e facciamo finta sia un u64...
+        let user_id: i64 = interpret_u64_as_i64(msg.author.id.into());
+
         let data_write = db_lock.write().await;
         let rows = data_write.query(
             "SELECT nome, link FROM disco WHERE utente = $1",
@@ -190,20 +193,33 @@ async fn lista(ctx: &Context, msg: &Message, _args: Args) -> CommandResult {
         }
     }
 
-    // Genera risposta ad hoc in privato
-    msg.author.dm(&ctx.http, |m| {
-        m.content("Questa è la tua collezione attuale:");
-        m.embed(|e| {
-            e.title("Playlist");
-            e.fields(fields);
-            e.footer(|f| {
-                f.text("Gilda dei Mercanti - Baldassarr Gonzaga");
-                f
+    // Non ci sono dischi nella playlist
+    if fields.len() == 0 {
+
+        // Genera risposta ad hoc in privato
+        msg.author.dm(&ctx.http, |m| {
+            m.content("Sembra che non ci sia niente nella tua libreria...");
+            m
+        }).await?;
+
+    }
+    else
+    {
+        // Genera risposta ad hoc in privato
+        msg.author.dm(&ctx.http, |m| {
+            m.content("Questa è la tua collezione attuale:");
+            m.embed(|e| {
+                e.title("Playlist");
+                e.fields(fields);
+                e.footer(|f| {
+                    f.text("Gilda dei Mercanti - Baldassarr Gonzaga");
+                    f
+                });
+                e
             });
-            e
-        });
-        m
-    }).await?;
+            m
+        }).await?;
+    }
 
     // Prova ad eliminare il messaggio dopo averlo processato
     if let Err(e) = msg.delete(&ctx.http).await {
