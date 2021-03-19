@@ -1,0 +1,15 @@
+
+target/
+data/
+.vscode/
+
+.gitignore
+
+config.env
+
+docker-compose.yaml
+.dockerignore
+Dockerfile
+
+LICENSE
+README.md

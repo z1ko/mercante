@@ -10,14 +10,20 @@
 // pls merlo:               Crea una frase da dire ad una persona quando esegue comandi
 //
 
-use serenity::{framework::standard::{
+use serenity::{
+    framework::standard::{
         Args, CommandResult,
         macros::{command, group},
-    }, model::channel::Message, prelude::*, utils::MessageBuilder};
+    }, 
+    model::channel::Message, prelude::*, 
+    utils::MessageBuilder
+};
+
+pub mod disco;
 
 #[group]
 #[commands(info, storia, vetrina)]
-struct General; // Comandi generici
+struct General;
 
 // TODO: Carica da file configurazione
 const PRESENTATION: &str = "
@@ -47,8 +53,9 @@ Ricorda che l'erba gatta è una valuta accettata e molto gradita,
 direi in molti casi perfino necessaria se vuoi guadagnarti la mia approvazione.
 ";
 
-#[command]
 // Fai presentare il mercante
+
+#[command]
 async fn info(ctx: &Context, msg: &Message, _args: Args) -> CommandResult {
     msg.channel_id.say(&ctx.http, PRESENTATION)
         .await?;
@@ -56,8 +63,9 @@ async fn info(ctx: &Context, msg: &Message, _args: Args) -> CommandResult {
     Ok(())
 }
 
-#[command]
 // Fai raccontare una storia al mercante
+
+#[command]
 async fn storia(ctx: &Context, msg: &Message, _args: Args) -> CommandResult {
     msg.channel_id.say(&ctx.http, "No, in questo momento ho altro da fare, quel Sangue di Giuda non si troverà da solo")
         .await?;
@@ -65,8 +73,9 @@ async fn storia(ctx: &Context, msg: &Message, _args: Args) -> CommandResult {
     Ok(())
 }
 
-#[command]
 // Mostra gli oggetti acquistabili
+
+#[command]
 async fn vetrina(ctx: &Context, msg: &Message, _args: Args) -> CommandResult {
 
     msg.channel_id.send_message(&ctx.http, |m| {

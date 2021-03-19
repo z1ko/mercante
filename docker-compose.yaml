@@ -1,0 +1,32 @@
+services: 
+
+  discord:
+    build: .
+    container_name: mercante-discord
+    env_file:
+      - ./config.env
+    networks:
+      - mediterraneo
+    links: 
+      - postgres:database
+
+  postgres:
+    image: postgres:13-alpine
+    container_name: mercante-postgres
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=mercante
+      - POSTGRES_USER=mercante
+      - POSTGRES_PASSWORD=mercante
+    networks:
+      - mediterraneo
+
+networks:
+  mediterraneo:
+    name: mediterraneo
+    driver: bridge
+
+volumes: 
+  postgres_data:
